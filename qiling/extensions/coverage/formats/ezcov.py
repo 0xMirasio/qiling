@@ -4,9 +4,9 @@
 #
 
 from __future__ import annotations
-from collections import namedtuple
-from os.path import basename
-from typing import TYPE_CHECKING, List
+
+import os
+from typing import Any, TYPE_CHECKING, List, NamedTuple
 
 from .base import QlBaseCoverage
 
@@ -16,10 +16,15 @@ if TYPE_CHECKING:
 
 
 # Adapted from https://github.com/nccgroup/Cartographer/blob/main/EZCOV.md#coverage-data
-class bb_entry(namedtuple('bb_entry', 'offset size mod_id')):
-    def csvline(self):
-        offset = '0x{:08x}'.format(self.offset)
+class bb_entry(NamedTuple):
+    offset: int
+    size: int
+    mod_id: Any
+
+    def as_csv(self) -> str:
+        offset = f'{self.offset:#010x}'
         mod_id = f"[ {self.mod_id if self.mod_id is not None else ''} ]"
+
         return f"{offset},{self.size},{mod_id}\n"
 
 class QlEzCoverage(QlBaseCoverage):
@@ -42,6 +47,10 @@ class QlEzCoverage(QlBaseCoverage):
         self.bb_callback = None
 
     def block_callback(self, ql: Qiling, address: int, size: int):
+        img = ql.loader.find_containing_image(address)
+
+        if img is not None:
+            self.basic_blocks.append(bb_entry(address - img.base, size, os.path.basename(img.path)))
 
     def activate(self) -> None:
         self.bb_callback = self.ql.hook_block(self.block_callback)
@@ -54,5 +63,5 @@ class QlEzCoverage(QlBaseCoverage):
         with open(coverage_file, "w") as cov:
             cov.write(f"EZCOV VERSION: {self.ezcov_version}\n")
             cov.write("# Qiling EZCOV exporter tool\n")
-            for bb in self.basic_blocks:
-                cov.write(bb.csvline())
+
+            cov.writelines(bb.as_csv() for bb in self.basic_blocks)

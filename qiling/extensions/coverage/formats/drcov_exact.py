@@ -19,5 +19,4 @@ class QlDrCoverageExact(QlDrCoverage):
 
     def activate(self) -> None:
         # We treat every instruction as a block on its own.
-        self.bb_callback = self.ql.hook_code(self.block_callback, user_data=self)
-        
+        self.bb_callback = self.ql.hook_code(self.block_callback)
