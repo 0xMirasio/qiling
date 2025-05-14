@@ -3,10 +3,16 @@
 # Cross Platform and Multi Architecture Advanced Binary Emulation Framework
 #
 
-from ctypes import Structure
-from ctypes import c_uint32, c_uint16
+from __future__ import annotations
+
+from ctypes import Structure, c_uint32, c_uint16
+from typing import TYPE_CHECKING, BinaryIO
 
 from .base import QlBaseCoverage
+
+
+if TYPE_CHECKING:
+    from qiling import Qiling
 
 
 # Adapted from https://www.ayrx.me/drcov-file-format
@@ -29,7 +35,7 @@ class QlDrCoverage(QlBaseCoverage):
 
     FORMAT_NAME = "drcov"
 
-    def __init__(self, ql):
+    def __init__(self, ql: Qiling):
         super().__init__(ql)
 
         self.drcov_version = 2
@@ -37,28 +43,27 @@ class QlDrCoverage(QlBaseCoverage):
         self.basic_blocks = []
         self.bb_callback = None
 
-    @staticmethod
-    def block_callback(ql, address, size, self):
-        for mod_id, mod in enumerate(ql.loader.images):
-            if mod.base <= address <= mod.end:
-                ent = bb_entry(address - mod.base, size, mod_id)
-                self.basic_blocks.append(ent)
-                break
+    def activate(self) -> None:
+        self.bb_callback = self.ql.hook_block(self.block_callback)
 
-    def activate(self):
-        self.bb_callback = self.ql.hook_block(self.block_callback, user_data=self)
+    def deactivate(self) -> None:
+        if self.bb_callback:
+            self.ql.hook_del(self.bb_callback)
 
-    def deactivate(self):
-        self.ql.hook_del(self.bb_callback)
+    def dump_coverage(self, coverage_file: str) -> None:
+        def __write_line(bio: BinaryIO, line: str) -> None:
+            bio.write(f'{line}\n'.encode())
 
-    def dump_coverage(self, coverage_file):
         with open(coverage_file, "wb") as cov:
-            cov.write(f"DRCOV VERSION: {self.drcov_version}\n".encode())
-            cov.write(f"DRCOV FLAVOR: {self.drcov_flavor}\n".encode())
-            cov.write(f"Module Table: version {self.drcov_version}, count {len(self.ql.loader.images)}\n".encode())
-            cov.write("Columns: id, base, end, entry, checksum, timestamp, path\n".encode())
+            __write_line(cov, f"DRCOV VERSION: {self.drcov_version}")
+            __write_line(cov, f"DRCOV FLAVOR: {self.drcov_flavor}")
+            __write_line(cov, f"Module Table: version {self.drcov_version}, count {len(self.ql.loader.images)}")
+            __write_line(cov, "Columns: id, base, end, entry, checksum, timestamp, path")
+
             for mod_id, mod in enumerate(self. ql.loader.images):
-                cov.write(f"{mod_id}, {mod.base}, {mod.end}, 0, 0, 0, {mod.path}\n".encode())
-            cov.write(f"BB Table: {len(self.basic_blocks)} bbs\n".encode())
-            for bb in self.basic_blocks:
+                __write_line(cov, f"{mod_id}, {mod.base}, {mod.end}, 0, 0, 0, {mod.path}")
+
+            __write_line(cov, f"BB Table: {len(self.basic_blocks)} bbs")
+
+            for bb in self.basic_blocks.values():
                 cov.write(bytes(bb))

@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-# 
+#
 # Cross Platform and Multi Architecture Advanced Binary Emulation Framework
 #
 
+from __future__ import annotations
 from collections import namedtuple
 from os.path import basename
+from typing import TYPE_CHECKING, List
 
 from .base import QlBaseCoverage
+
+
+if TYPE_CHECKING:
+    from qiling import Qiling
 
 
 # Adapted from https://github.com/nccgroup/Cartographer/blob/main/EZCOV.md#coverage-data
@@ -27,27 +33,24 @@ class QlEzCoverage(QlBaseCoverage):
 
     FORMAT_NAME = "ezcov"
 
-    def __init__(self, ql):
+    def __init__(self, ql: Qiling):
         super().__init__(ql)
+
         self.ezcov_version = 1
-        self.ezcov_flavor  = 'ezcov'
-        self.basic_blocks  = []
-        self.bb_callback   = None
+        self.ezcov_flavor = 'ezcov'
+        self.basic_blocks: List[bb_entry]  = []
+        self.bb_callback = None
 
-    @staticmethod
-    def block_callback(ql, address, size, self):
-        mod = ql.loader.find_containing_image(address)
-        if mod is not None:
-            ent = bb_entry(address - mod.base, size, basename(mod.path))
-            self.basic_blocks.append(ent)
+    def block_callback(self, ql: Qiling, address: int, size: int):
 
-    def activate(self):
-        self.bb_callback = self.ql.hook_block(self.block_callback, user_data=self)
+    def activate(self) -> None:
+        self.bb_callback = self.ql.hook_block(self.block_callback)
 
-    def deactivate(self):
-        self.ql.hook_del(self.bb_callback)
+    def deactivate(self) -> None:
+        if self.bb_callback:
+            self.ql.hook_del(self.bb_callback)
 
-    def dump_coverage(self, coverage_file):
+    def dump_coverage(self, coverage_file: str) -> None:
         with open(coverage_file, "w") as cov:
             cov.write(f"EZCOV VERSION: {self.ezcov_version}\n")
             cov.write("# Qiling EZCOV exporter tool\n")
