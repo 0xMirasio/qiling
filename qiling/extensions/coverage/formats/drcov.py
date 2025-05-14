@@ -6,13 +6,15 @@
 from __future__ import annotations
 
 from ctypes import Structure, c_uint32, c_uint16
-from typing import TYPE_CHECKING, BinaryIO
+from functools import lru_cache
+from typing import TYPE_CHECKING, BinaryIO, Dict, Tuple
 
 from .base import QlBaseCoverage
 
 
 if TYPE_CHECKING:
     from qiling import Qiling
+    from qiling.loader.loader import QlLoader
 
 
 # Adapted from https://www.ayrx.me/drcov-file-format
@@ -40,8 +42,34 @@ class QlDrCoverage(QlBaseCoverage):
 
         self.drcov_version = 2
         self.drcov_flavor = 'drcov'
-        self.basic_blocks = []
+        self.basic_blocks: Dict[int, bb_entry] = {}
         self.bb_callback = None
+
+    @lru_cache(maxsize=64)
+    def _get_img_base(self, loader: QlLoader, address: int) -> Tuple[int, int]:
+        """Retrieve the containing image of a given address.
+
+        Addresses are expected to be aligned to page boundary, and cached for faster retrieval.
+        """
+
+        return next((i, img.base) for i, img in enumerate(loader.images) if img.base <= address < img.end)
+
+    def block_callback(self, ql: Qiling, address: int, size: int):
+        if address not in self.basic_blocks:
+            try:
+                # we rely on the fact that images are allocated on page size boundary and
+                # use it to speed up image retrieval. we align the basic block address to
+                # page boundary, knowing basic blocks within the same page belong to the
+                # same image. then we use the aligned address to retreive the containing
+                # image. returned values are cached so subsequent retrievals for basic
+                # blocks within the same page will return the cached value instead of
+                # going through the retreival process again (up to maxsize cached pages)
+
+                i, img_base = self._get_img_base(ql.loader, address & ~(0x1000 - 1))
+            except StopIteration:
+                pass
+            else:
+                self.basic_blocks[address] = bb_entry(address - img_base, size, i)
 
     def activate(self) -> None:
         self.bb_callback = self.ql.hook_block(self.block_callback)
