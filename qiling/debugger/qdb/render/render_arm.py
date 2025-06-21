@@ -3,7 +3,7 @@
 # Cross Platform and Multi Architecture Advanced Binary Emulation Framework
 #
 
-from typing import Iterator, Optional
+from typing import Iterator
 
 from .render import Render, ContextRender
 from ..arch import ArchARM, ArchCORTEX_M
