@@ -15,7 +15,7 @@ class ContextRenderARM(ContextRender, ArchARM):
     """
 
     def print_mode_info(self) -> None:
-        cpsr = self.read_reg('cpsr')
+        cpsr = self.read_reg(self._flags_reg)
 
         flags = ArchARM.get_flags(cpsr)
         mode = ArchARM.get_mode(cpsr)

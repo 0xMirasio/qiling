@@ -31,7 +31,7 @@ class BranchPredictorARM(BranchPredictor, ArchARM):
         """Get flags map of CPSR.
         """
 
-        cpsr = self.read_reg('cpsr')
+        cpsr = self.read_reg(self._flags_reg)
 
         return (
             (cpsr & (0b1 << 28)) != 0,  # V, overflow flag
