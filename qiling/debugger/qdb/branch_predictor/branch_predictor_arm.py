@@ -17,7 +17,7 @@ from capstone.arm_const import (
 from unicorn.arm_const import UC_ARM_REG_PC
 
 from .branch_predictor import BranchPredictor, Prophecy
-from ..arch import ArchARM
+from ..arch import ArchARM, ArchCORTEX_M
 from ..misc import InvalidInsn
 
 
@@ -261,6 +261,6 @@ class BranchPredictorARM(BranchPredictor, ArchARM):
         return Prophecy(going, where)
 
 
-class BranchPredictorCORTEX_M(BranchPredictorARM):
+class BranchPredictorCORTEX_M(BranchPredictorARM, ArchCORTEX_M):
     """Branch Predictor for ARM Cortex-M.
     """
