@@ -10,13 +10,17 @@ sys.path.append("..")
 
 from qiling.core import Qiling
 from qiling.const import QL_ARCH, QL_OS, QL_VERBOSE
-from qiling.os.const import STRING
+from qiling.os.const import STRING, POINTER, SIZE_T
 
 
 class BlobTest(unittest.TestCase):
     def test_uboot_arm(self):
-        def my_getenv(ql, *args, **kwargs):
-            env = {"ID": b"000000000000000", "ethaddr": b"11:22:33:44:55:66"}
+        def my_getenv(ql: Qiling):
+            env = {
+                "ID": b"000000000000000",
+                "ethaddr": b"11:22:33:44:55:66"
+            }
+
             params = ql.os.resolve_fcall_params({'key': STRING})
             value = env.get(params["key"], b"")
 
@@ -26,12 +30,23 @@ class BlobTest(unittest.TestCase):
             ql.arch.regs.r0 = value_addr
             ql.arch.regs.arch_pc = ql.arch.regs.lr
 
-        def check_password(ql, *args, **kwargs):
-            passwd_output = ql.mem.read(ql.arch.regs.r0, ql.arch.regs.r2)
-            passwd_input = ql.mem.read(ql.arch.regs.r1, ql.arch.regs.r2)
-            self.assertEqual(passwd_output, passwd_input)
+        def check_password(ql: Qiling):
+            params = ql.os.resolve_fcall_params({
+                'ptr1': POINTER,  # points to real password
+                'ptr2': POINTER,  # points to user provided password
+                'size': SIZE_T    # comparison length
+            })
 
-        def partial_run_init(ql):
+            ptr1 = params['ptr1']
+            ptr2 = params['ptr2']
+            size = params['size']
+
+            real_password = ql.mem.read(ptr1, size)
+            user_password = ql.mem.read(ptr2, size)
+
+            self.assertSequenceEqual(real_password, user_password, seq_type=bytearray)
+
+        def partial_run_init(ql: Qiling):
             # argv prepare
             ql.arch.regs.arch_sp -= 0x30
             arg0_ptr = ql.arch.regs.arch_sp
@@ -56,13 +71,14 @@ class BlobTest(unittest.TestCase):
 
         ql = Qiling(code=uboot_code[0x40:], archtype=QL_ARCH.ARM, ostype=QL_OS.BLOB, profile="profiles/uboot_bin.ql", verbose=QL_VERBOSE.DEBUG)
 
-        image_base_addr = ql.loader.load_address
-        ql.hook_address(my_getenv, image_base_addr + 0x13AC0)
-        ql.hook_address(check_password, image_base_addr + 0x48634)
+        imgbase = ql.loader.images[0].base
+
+        ql.hook_address(my_getenv, imgbase + 0x13AC0)
+        ql.hook_address(check_password, imgbase + 0x48634)
 
         partial_run_init(ql)
 
-        ql.run(image_base_addr + 0x486B4, image_base_addr + 0x48718)
+        ql.run(imgbase + 0x486B4, imgbase + 0x48718)
 
         del ql
 
