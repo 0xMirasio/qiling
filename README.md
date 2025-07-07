@@ -15,6 +15,7 @@ Qiling is an advanced binary emulation framework that allows you to emulate and 
 ## Table of Contents
 
 - [Features](#features)
+- [Appearance](#Appearance)
 - [Use Cases](#use-cases)
 - [Quick Start](#quick-start)
   - [Installation](#installation)
@@ -42,6 +43,35 @@ Qiling is an advanced binary emulation framework that allows you to emulate and 
 - **Debugging Capabilities**: Supports cross-architecture and platform debugging, including a built-in debugger with reverse debugging capability.
 - **Dynamic Hot Patching**: Allows dynamic hot patching of on-the-fly running code, including loaded libraries.
 - **Python Framework**: A true framework in Python, making it easy to build customized security analysis tools.
+
+## Appearance
+
+Qiling also made its way to various international conferences.
+
+2022:
+- [Black Hat, EU](https://www.blackhat.com/eu-22/arsenal/schedule/#reversing-mcu-with-firmware-emulation-29553)
+- [Black Hat, MEA](https://blackhatmea.com/node/724)
+
+2021:
+- [Black Hat, USA](https://www.blackhat.com/us-21/arsenal/schedule/index.html#bringing-the-x-complete-re-experience-to-smart-contract-24119)
+- [Hack In The Box, Amsterdam](https://conference.hitb.org/hitbsecconf2021ams/sessions/when-qiling-framework-meets-symbolic-execution/)
+- [Black Hat, Asia](https://www.blackhat.com/asia-21/arsenal/schedule/index.html#qiling-smart-analysis-for-smart-contract-22643)
+
+2020:
+- [Black Hat, Europe](https://www.blackhat.com/eu-20/arsenal/schedule/index.html#qiling-framework-deep-dive-into-obfuscated-binary-analysis-21781)
+- [Black Hat, USA](https://www.blackhat.com/us-20/arsenal/schedule/index.html#qiling-framework-from-dark-to-dawn-----enlightening-the-analysis-of-the-most-mysterious-iot-firmware--21062)
+- [Black Hat, USA (Demigod)](https://www.blackhat.com/us-20/briefings/schedule/#demigod-the-art-of-emulating-kernel-rootkits-20009)
+- [Black Hat, Asia](https://www.blackhat.com/asia-20/arsenal/schedule/index.html#qiling-lightweight-advanced-binary-analyzer-19245)
+- [Hack In The Box, Lockdown 001](https://conference.hitb.org/lockdown-livestream/)
+- [Hack In The Box, Lockdown 002](https://conference.hitb.org/hitb-lockdown002/virtual-labs/virtual-lab-qiling-framework-learn-how-to-build-a-fuzzer-based-on-a-1day-bug/)
+- [Hack In The Box, Cyberweek](https://cyberweek.ae/2020/lab-qiling-framework/)
+- [Nullcon](https://nullcon.net/website/goa-2020/speakers/kaijern-lau.php)
+    
+2019:
+
+- [DEFCON, USA](https://www.defcon.org/html/defcon-27/dc-27-demolabs.html#QiLing)
+- [Hitcon](https://hitcon.org/2019/CMT/agenda)
+- [Zeronights](https://zeronights.ru/report-en/qiling-io-advanced-binary-emulation-framework/)
 
 ## Use Cases
 
