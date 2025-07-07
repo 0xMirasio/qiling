@@ -1,4 +1,4 @@
-[![Documentation Status](https://readthedocs.org/projects/qilingframework/badge/?version=latest)](https://docs.qiling.io)
+[![Documentation Status](https://github.com/qilingframework/qiling/wiki)](https://github.com/qilingframework/qiling/wiki)
 [![Downloads](https://pepy.tech/badge/qiling)](https://pepy.tech/project/qiling)
 [![Chat on Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/qilingframework)
 
@@ -65,7 +65,7 @@ Qiling requires Python 3.8 or newer. You can install it using pip:
 pip install qiling
 ```
 
-For more detailed installation instructions and dependencies, please refer to the [official documentation](https://docs.qiling.io/en/latest/install/).
+For more detailed installation instructions and dependencies, please refer to the [official documentation](https://github.com/qilingframework/qiling/wiki/Installation).
 
 ### Basic Usage
 
