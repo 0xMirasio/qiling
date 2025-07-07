@@ -68,7 +68,6 @@ Qiling also made its way to various international conferences.
 - [Nullcon](https://nullcon.net/website/goa-2020/speakers/kaijern-lau.php)
     
 2019:
-
 - [DEFCON, USA](https://www.defcon.org/html/defcon-27/dc-27-demolabs.html#QiLing)
 - [Hitcon](https://hitcon.org/2019/CMT/agenda)
 - [Zeronights](https://zeronights.ru/report-en/qiling-io-advanced-binary-emulation-framework/)
