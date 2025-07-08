@@ -13,14 +13,21 @@ from qiling.arch.arm_const import (
     reg_map_q as arm_regs_q,
     reg_map_s as arm_regs_s
 )
+
+from qiling.arch.cortex_m_const import (
+    reg_map as conretx_m_regs
+)
+
 from qiling.arch.arm64_const import (
     reg_map as arm64_regs,
     reg_map_v as arm64_regs_v,
     reg_map_fp as arm64_reg_map_fp
 )
+
 from qiling.arch.mips_const import (
     reg_map as mips_regs_gpr
 )
+
 from qiling.arch.x86_const import (
     reg_map_32 as x86_regs_32,
     reg_map_64 as x86_regs_64,
@@ -133,7 +140,7 @@ class QlGdbFeatures:
             QL_ARCH.X86:      dict(**x86_regs_32, **x86_regs_misc, **x86_regs_cr, **x86_regs_st, **x86_regs_xmm),
             QL_ARCH.X8664:    dict(**x86_regs_64, **x86_regs_misc, **x86_regs_cr, **x86_regs_st, **x86_regs_xmm, **x86_regs_ymm),
             QL_ARCH.ARM:      dict(**arm_regs, **arm_regs_vfp, **arm_regs_q, **arm_regs_s),
-            QL_ARCH.CORTEX_M: arm_regs,
+            QL_ARCH.CORTEX_M: dict(**conretx_m_regs),
             QL_ARCH.ARM64:    dict(**arm64_regs, **arm64_regs_v, **arm64_reg_map_fp),
             QL_ARCH.MIPS:     dict(**mips_regs_gpr)
         }[archtype]
