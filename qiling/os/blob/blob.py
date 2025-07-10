@@ -9,6 +9,7 @@ from qiling.const import QL_ARCH, QL_OS
 from qiling.os.fcall import QlFunctionCall
 from qiling.os.os import QlOs
 
+
 class QlOsBlob(QlOs):
     """ QlOsBlob for bare barines.
 
@@ -21,7 +22,7 @@ class QlOsBlob(QlOs):
     type = QL_OS.BLOB
 
     def __init__(self, ql: Qiling):
-        super(QlOsBlob, self).__init__(ql)
+        super().__init__(ql)
 
         self.ql = ql
 
@@ -39,11 +40,14 @@ class QlOsBlob(QlOs):
         self.fcall = QlFunctionCall(ql, cc)
 
     def run(self):
-        if self.ql.entry_point:
+        # if entry point was set explicitly, override the default one
+        if self.ql.entry_point is not None:
             self.entry_point = self.ql.entry_point
 
-        self.exit_point = self.ql.loader.load_address + len(self.ql.code)
-        if self.ql.exit_point:
+        self.exit_point = self.load_address + len(self.ql.code)
+
+        # if exit point was set explicitly, override the default one
+        if self.ql.exit_point is not None:
             self.exit_point = self.ql.exit_point
 
         self.ql.emu_start(self.entry_point, self.exit_point, self.ql.timeout, self.ql.count)

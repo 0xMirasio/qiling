@@ -15,7 +15,8 @@ class QlLoaderBLOB(QlLoader):
         self.load_address = 0
 
     def run(self):
-        self.load_address = self.ql.os.entry_point      # for consistency
+        self.load_address = self.ql.os.load_address
+        self.entry_point = self.ql.os.entry_point
 
         code_begins = self.load_address
         code_size = self.ql.os.code_ram_size
@@ -28,8 +29,10 @@ class QlLoaderBLOB(QlLoader):
         self.images.append(Image(code_begins, code_ends, 'blob_code'))
 
         # FIXME: heap starts above end of ram??
+        # FIXME: heap should be allocated by OS, not loader
         heap_base = code_ends
         heap_size = int(self.ql.os.profile.get("CODE", "heap_size"), 16)
         self.ql.os.heap = QlMemoryHeap(self.ql, heap_base, heap_base + heap_size)
 
+        # FIXME: stack pointer should be a configurable profile setting
         self.ql.arch.regs.arch_sp = code_ends - 0x1000
