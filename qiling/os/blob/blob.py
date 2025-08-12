@@ -2,6 +2,9 @@
 #
 # Cross Platform and Multi Architecture Advanced Binary Emulation Framework
 #
+# Added support for raw binary blob emulation
+#    Kelly Patterson - Cisco Talos
+#         Copyright (C) 2025 Cisco Systems Inc
 
 from qiling import Qiling
 from qiling.cc import QlCC, intel, arm, mips, riscv, ppc
@@ -44,10 +47,10 @@ class QlOsBlob(QlOs):
         if self.ql.entry_point is not None:
             self.entry_point = self.ql.entry_point
 
-        self.exit_point = self.load_address + len(self.ql.code)
-
         # if exit point was set explicitly, override the default one
         if self.ql.exit_point is not None:
             self.exit_point = self.ql.exit_point
+        elif self.ql.code is not None: # self.ql.code might not always be provided
+            self.exit_point = self.load_address + len(self.ql.code)
 
         self.ql.emu_start(self.entry_point, self.exit_point, self.ql.timeout, self.ql.count)
