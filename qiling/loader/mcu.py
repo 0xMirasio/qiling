@@ -130,7 +130,7 @@ class QlLoaderMCU(QlLoader):
                 self.ql.hw.create(name.lower())
 
             else:
-                self.ql.log.error(f'Unknown memory type "{memtype}" for {name}')
+                self.ql.log.debug(f'ignoring unknown memory type "{memtype}" for {name}')
 
     def run(self):
         self.load_profile()
