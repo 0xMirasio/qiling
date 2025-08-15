@@ -114,19 +114,22 @@ class QlLoaderMCU(QlLoader):
                 base = args['base']
                 self.ql.mem.map(base, size, info=f'[{name}]')
             
-            if memtype == 'remap':
+            # elif memtype == 'remap':
+            #     size = args['size']
+            #     base = args['base']
+            #     alias = args['alias']
+            #     self.ql.hw.setup_remap(alias, base, size, info=f'[{name}]')
+
+            elif memtype == 'mmio':
                 size = args['size']
                 base = args['base']
-                alias = args['alias']
-                self.ql.hw.setup_remap(alias, base, size, info=f'[{name}]')
+                self.ql.hw.setup_mmio(base, size, name)
 
-            if memtype == 'mmio':
-                size = args['size']
-                base = args['base']
-                self.ql.hw.setup_mmio(base, size, info=f'[{name}]')
-
-            if memtype == 'core':
+            elif memtype == 'core':
                 self.ql.hw.create(name.lower())
+
+            else:
+                self.ql.log.error(f'Unknown memory type "{memtype}" for {name}')
 
     def run(self):
         self.load_profile()
