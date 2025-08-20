@@ -97,17 +97,16 @@ class BlobTest(unittest.TestCase):
             DATA_ADDR = 0xa0000000
             STACK_ADDR = 0xb0000000
 
-            ql = Qiling(archtype=QL_ARCH.ARM, ostype=QL_OS.BLOB, profile="profiles/blob_raw.ql", verbose=QL_VERBOSE.DEBUG, thumb=True)
+            with open("../examples/rootfs/blob/example_raw.bin", "rb") as f:
+                raw_code = f.read()
+
+            ql = Qiling(code=raw_code, archtype=QL_ARCH.ARM, ostype=QL_OS.BLOB, profile="profiles/blob_raw.ql", verbose=QL_VERBOSE.DEBUG, thumb=True)
 
             input_data_len = len(input_data_buffer)
 
-            # Map memory for the binary, data and stack
-            ql.mem.map(BASE_ADDRESS, 0x10000)
+            # Map memory for data and stack
             ql.mem.map(STACK_ADDR, 0x2000)
             ql.mem.map(DATA_ADDR, ql.mem.align_up(input_data_len + 0x100))
-
-            # Write the binary into memory
-            ql.mem.write(BASE_ADDRESS, open("../examples/rootfs/blob/example_raw.bin", "rb").read())
 
             # Write input data
             ql.mem.write(DATA_ADDR, input_data_buffer)
