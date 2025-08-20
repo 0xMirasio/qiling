@@ -2,7 +2,7 @@
 #
 # Cross Platform and Multi Architecture Advanced Binary Emulation Framework
 #
-# Added support for raw binary blob emulation
+# Heaps are optional for blobs
 #    Kelly Patterson - Cisco Talos
 #         Copyright (C) 2025 Cisco Systems Inc
 #         Licensed under the GNU General Public License v2.0 or later
