@@ -1,13 +1,13 @@
 ##############################################################################
-# Added example for raw binary blob  
-#    Kelly Patterson - Cisco Talos
-#         Copyright (C) 2025 Cisco Systems Inc
-#         Licensed under the GNU General Public License v2.0 or later
+# This example is meant to demonstrate the modifications necessary 
+# to enable code coverage when emulating small code snippets or bare-metal 
+# code.
 ##############################################################################
 from qiling import Qiling
 from qiling.const import QL_ARCH, QL_OS, QL_VERBOSE
 from qiling.extensions.coverage import utils as cov_utils
 from qiling.loader.loader import Image
+import os
 
 BASE_ADDRESS = 0x10000000
 CHECKSUM_FUNC_ADDR = BASE_ADDRESS + 0x8
@@ -16,6 +16,8 @@ DATA_ADDR = 0xa0000000 # Arbitrary address for data
 STACK_ADDR = 0xb0000000 # Arbitrary address for stack
 
 # Python implementation of the checksum function being emulated
+# This checksum function is intended to have different code paths based on the input
+# which is useful for observing code coverage
 def checksum_function(input_data_buffer: bytes):
     expected_checksum_python = 0
     input_data_len = len(input_data_buffer)
@@ -33,26 +35,34 @@ def checksum_function(input_data_buffer: bytes):
     expected_checksum_python &= 0xFF # Ensure it's a single byte
     return expected_checksum_python
 
-def unmapped_handler(ql, type, addr, size, value):
+def unmapped_handler(ql: Qiling, type: int, addr: int, size: int, value: int) -> None:
+    print(f"Unmapped Memory R/W, trying to access {size:d} bytes at {addr:#010x} from {ql.arch.regs.pc:#010x}")
 
-    print(f"Unmapped Memory R/W, trying to access {hex(size)} bytes at {hex(addr)} from {hex(ql.arch.regs.pc)}")
-
-def emulate_checksum_function(input_data_buffer: bytes):
+def emulate_checksum_function(input_data_buffer: bytes) -> None:
     print(f"\n--- Testing with input: {input_data_buffer.hex()} ---")
 
-    with open("rootfs/blob/example_raw.bin", "rb") as f:
-        raw_code = f.read()
+    test_file = "rootfs/blob/example_raw.bin"
 
-    ql = Qiling(code=raw_code, archtype=QL_ARCH.ARM, ostype=QL_OS.BLOB, profile="blob_raw.ql", verbose=QL_VERBOSE.DEBUG, thumb=True)
+    with open(test_file, "rb") as f:
+        raw_code: bytes = f.read()
 
-    # monkeypatch - Correcting the loader image name, used for coverage collection
-    # Remove all images with name 'blob_code' that were created by the blob loader
+    ql: Qiling = Qiling(
+        code=raw_code,
+        archtype=QL_ARCH.ARM,
+        ostype=QL_OS.BLOB,
+        profile="blob_raw.ql",
+        verbose=QL_VERBOSE.DEBUG,
+        thumb=True
+    )
+
+    ''' monkeypatch - Correcting the loader image name, used for coverage collection
+    removing all images with name 'blob_code' that were created by the blob loader. 
+    This is necessary because some code coverage visualization tools require the 
+    module name to match that of the input file '''
     ql.loader.images = [img for img in ql.loader.images if img.path != 'blob_code']
-    # Add image back with correct info
-    ql.loader.images.append(Image(ql.loader.load_address, ql.loader.load_address + ql.os.code_ram_size, 'example_raw.bin'))
+    ql.loader.images.append(Image(ql.loader.load_address, ql.loader.load_address + ql.os.code_ram_size, os.path.basename(test_file)))
 
-
-    input_data_len = len(input_data_buffer)
+    input_data_len: int = len(input_data_buffer)
 
     # Map memory for the data and stack
     ql.mem.map(STACK_ADDR, 0x2000)
@@ -89,4 +99,3 @@ def emulate_checksum_function(input_data_buffer: bytes):
 if __name__ == "__main__":
     data = b"\x01\x02\x03\x04\x05"  # Example input data
     emulate_checksum_function(data)
-    print(hex(checksum_function(data)))

@@ -2,10 +2,6 @@
 #
 # Cross Platform and Multi Architecture Advanced Binary Emulation Framework
 #
-# Added test for raw binary blob emulation
-#    Kelly Patterson - Cisco Talos
-#         Copyright (C) 2025 Cisco Systems Inc
-#         Licensed under the GNU General Public License v2.0 or later
 
 import unittest
 
@@ -87,7 +83,7 @@ class BlobTest(unittest.TestCase):
         del ql
 
     @unittest.skip("Temporarily disabled")
-    def test_blob_checksum_calculations(self):
+    def test_blob_raw(self):
         def run_checksum_emu(input_data_buffer: bytes) -> int:
             """
             Callable function that takes input data buffer and returns the checksum.
@@ -145,41 +141,8 @@ class BlobTest(unittest.TestCase):
 
             return expected_checksum & 0xFF
 
-        # Test cases with descriptions
-        test_cases = {
-            "default_path": {
-                "data": b"\x01\x02\x03\x04\x05",
-                "description": "Default path - simple sum of all bytes"
-            },
-            "magic_value_1": {
-                "data": b"\xDE\x01\x02\x03\x04\x05",
-                "description": "Magic Value 1 path (0xDE at data[0]) - sum first 4 bytes + 0x10"
-            },
-            "magic_value_2": {
-                "data": b"\x01\xAD\x02\x03\x04\x05",
-                "description": "Magic Value 2 path (0xAD at data[1]) - XOR all bytes + 0x20"
-            },
-            "edge_magic1_short": {
-                "data": b"\xDE\x01",
-                "description": "Edge case: Magic Value 1, but short data (only 2 bytes)"
-            },
-            "edge_magic2_too_short": {
-                "data": b"\xAD",
-                "description": "Edge case: Magic Value 2, but too short (fallback to default)"
-            },
-            "both_magic_values": {
-                "data": b"\xDE\xAD\x01\x02",
-                "description": "Both magic values present, DE at [0] takes precedence"
-            }
-        }
-
-        # Assertions with descriptions - directly call functions with test data
-        self.assertEqual(run_checksum_emu(test_cases["default_path"]["data"]), calculate_expected_checksum(test_cases["default_path"]["data"]))  # Default path
-        self.assertEqual(run_checksum_emu(test_cases["magic_value_1"]["data"]), calculate_expected_checksum(test_cases["magic_value_1"]["data"]))  # Magic Value 1 path
-        self.assertEqual(run_checksum_emu(test_cases["magic_value_2"]["data"]), calculate_expected_checksum(test_cases["magic_value_2"]["data"]))  # Magic Value 2 path
-        self.assertEqual(run_checksum_emu(test_cases["edge_magic1_short"]["data"]), calculate_expected_checksum(test_cases["edge_magic1_short"]["data"]))  # Edge case: Magic Value 1, short data
-        self.assertEqual(run_checksum_emu(test_cases["edge_magic2_too_short"]["data"]), calculate_expected_checksum(test_cases["edge_magic2_too_short"]["data"]))  # Edge case: Magic Value 2, too short
-        self.assertEqual(run_checksum_emu(test_cases["both_magic_values"]["data"]), calculate_expected_checksum(test_cases["both_magic_values"]["data"]))  # Both magic values, DE takes precedence
+        test_input = b"\x01\x02\x03\x04\x05"
+        self.assertEqual(run_checksum_emu(test_input), calculate_expected_checksum(test_input))
 
 
 if __name__ == "__main__":

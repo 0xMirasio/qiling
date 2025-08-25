@@ -2,15 +2,9 @@
 #
 # Cross Platform and Multi Architecture Advanced Binary Emulation Framework
 #
-# Heaps are optional for blobs
-#    Kelly Patterson - Cisco Talos
-#         Copyright (C) 2025 Cisco Systems Inc
-#         Licensed under the GNU General Public License v2.0 or later
 
 from qiling import Qiling
 from qiling.loader.loader import QlLoader, Image
-from qiling.os.memory import QlMemoryHeap
-import configparser
 
 
 class QlLoaderBLOB(QlLoader):
@@ -32,16 +26,6 @@ class QlLoaderBLOB(QlLoader):
 
         # allow image-related functionalities
         self.images.append(Image(code_begins, code_ends, 'blob_code'))
-
-        # FIXME: heap starts above end of ram??
-        # FIXME: heap should be allocated by OS, not loader
-        heap_base = code_ends
-        # if heap_size is defined, create the heap
-        try:
-            heap_size = int(self.ql.os.profile.get("CODE", "heap_size"), 16)
-            self.ql.os.heap = QlMemoryHeap(self.ql, heap_base, heap_base + heap_size)
-        except (configparser.NoSectionError, configparser.NoOptionError):
-            pass # heap_size is not required
 
         # FIXME: stack pointer should be a configurable profile setting
         self.ql.arch.regs.arch_sp = code_ends - 0x1000

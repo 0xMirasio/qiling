@@ -1,11 +1,4 @@
 /* linker.ld */
- /*
- * Added example for raw binary blob
- *     Kelly Patterson - Cisco Talos
- *     Copyright (C) 2025 Cisco Systems Inc
- *     Licensed under the GNU General Public License v2.0 or later
- *
- */
 
 ENTRY(_start) /* Define the entry point of our program */
 
