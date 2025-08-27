@@ -82,7 +82,6 @@ class BlobTest(unittest.TestCase):
 
         del ql
 
-    @unittest.skip("Temporarily disabled")
     def test_blob_raw(self):
         def run_checksum_emu(input_data_buffer: bytes) -> int:
             """
