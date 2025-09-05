@@ -5,7 +5,6 @@
 
 from qiling import Qiling
 from qiling.loader.loader import QlLoader, Image
-from qiling.os.memory import QlMemoryHeap
 
 
 class QlLoaderBLOB(QlLoader):
@@ -27,12 +26,6 @@ class QlLoaderBLOB(QlLoader):
 
         # allow image-related functionalities
         self.images.append(Image(code_begins, code_ends, 'blob_code'))
-
-        # FIXME: heap starts above end of ram??
-        # FIXME: heap should be allocated by OS, not loader
-        heap_base = code_ends
-        heap_size = int(self.ql.os.profile.get("CODE", "heap_size"), 16)
-        self.ql.os.heap = QlMemoryHeap(self.ql, heap_base, heap_base + heap_size)
 
         # FIXME: stack pointer should be a configurable profile setting
         self.ql.arch.regs.arch_sp = code_ends - 0x1000

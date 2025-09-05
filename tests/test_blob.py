@@ -82,6 +82,67 @@ class BlobTest(unittest.TestCase):
 
         del ql
 
+    def test_blob_raw(self):
+        def run_checksum_emu(input_data_buffer: bytes) -> int:
+            """
+            Callable function that takes input data buffer and returns the checksum.
+            """
+            BASE_ADDRESS = 0x10000000
+            CHECKSUM_FUNC_ADDR = BASE_ADDRESS + 0x8
+            END_ADDRESS = 0x100000ba
+            DATA_ADDR = 0xa0000000
+            STACK_ADDR = 0xb0000000
+
+            with open("../examples/rootfs/blob/example_raw.bin", "rb") as f:
+                raw_code = f.read()
+
+            ql = Qiling(code=raw_code, archtype=QL_ARCH.ARM, ostype=QL_OS.BLOB, profile="profiles/blob_raw.ql", verbose=QL_VERBOSE.DEBUG, thumb=True)
+
+            input_data_len = len(input_data_buffer)
+
+            # Map memory for data and stack
+            ql.mem.map(STACK_ADDR, 0x2000)
+            ql.mem.map(DATA_ADDR, ql.mem.align_up(input_data_len + 0x100))
+
+            # Write input data
+            ql.mem.write(DATA_ADDR, input_data_buffer)
+
+            # Set up registers
+            ql.arch.regs.sp = STACK_ADDR + 0x2000 - 4
+            ql.arch.regs.r0 = DATA_ADDR
+            ql.arch.regs.r1 = input_data_len
+            ql.arch.regs.pc = CHECKSUM_FUNC_ADDR
+            ql.arch.regs.lr = 0xbebebebe
+
+            ql.run(begin=CHECKSUM_FUNC_ADDR, end=END_ADDRESS)
+            result = ql.arch.regs.r0
+
+            return result
+
+        def calculate_expected_checksum(input_data_buffer: bytes) -> int:
+            """
+            Python implementation of the expected checksum calculation.
+            """
+            input_data_len = len(input_data_buffer)
+            expected_checksum = 0
+
+            if input_data_len >= 1 and input_data_buffer[0] == 0xDE:  # MAGIC_VALUE_1
+                for i in range(min(input_data_len, 4)):
+                    expected_checksum += input_data_buffer[i]
+                expected_checksum += 0x10
+            elif input_data_len >= 2 and input_data_buffer[1] == 0xAD:  # MAGIC_VALUE_2
+                for i in range(input_data_len):
+                    expected_checksum ^= input_data_buffer[i]
+                expected_checksum += 0x20
+            else:
+                for i in range(input_data_len):
+                    expected_checksum += input_data_buffer[i]
+
+            return expected_checksum & 0xFF
+
+        test_input = b"\x01\x02\x03\x04\x05"
+        self.assertEqual(run_checksum_emu(test_input), calculate_expected_checksum(test_input))
+
 
 if __name__ == "__main__":
     unittest.main()
