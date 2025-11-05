@@ -25,17 +25,6 @@ class bb_entry(Structure):
         ("mod_id", c_uint16)
     ]
 
-    def __init__(self, start, size, module_id=None):
-        self.start = start
-        self.size = size
-        self.module_id = module_id
-    
-    def __eq__(self, other):
-        return (self.start, self.size, self.module_id) == (other.start, other.size, other.module_id)
-
-    def __hash__(self):
-        return hash((self.start, self.size, self.module_id))
-
 
 class QlDrCoverage(QlBaseCoverage):
     """
